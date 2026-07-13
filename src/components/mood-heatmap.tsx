@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { addDays, format, isSameDay, startOfWeek, subWeeks } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useAppStore } from "@/lib/store";
@@ -7,12 +8,19 @@ import { dateKey } from "@/lib/date";
 import { MOOD_META, type Mood } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const WEEKS = 20;
+const WEEKS = 52;
 const EMPTY_COLOR = "#EDE6D6";
 
-/** 깃허브 잔디 스타일 — 최근 20주의 기분 기록 */
+/** 깃허브 잔디 스타일 — 최근 1년의 기분 기록 */
 export function MoodHeatmap() {
   const reflections = useAppStore((s) => s.reflections);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 좁은 화면에선 가장 최근(오른쪽 끝)이 먼저 보이게
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, []);
 
   // 셀 140개 수준이라 memo 없이 매 렌더 계산해도 충분히 싸다 (React Compiler가 알아서 캐시)
   const moodByDate = new Map(reflections.map((r) => [r.date, r.mood]));
@@ -34,9 +42,9 @@ export function MoodHeatmap() {
 
   return (
     <div>
-      <div className="overflow-x-auto pb-1">
+      <div ref={scrollRef} className="overflow-x-auto pb-1">
         <div className="w-max">
-          <div className="mb-1 grid auto-cols-max grid-flow-col gap-1 text-[10px] text-muted-foreground">
+          <div className="mb-1 grid auto-cols-max grid-flow-col gap-[3px] text-[10px] text-muted-foreground">
             {monthLabels.map((label, i) => (
               <span key={i} className="h-3 w-3.5 overflow-visible whitespace-nowrap">
                 {label}
@@ -44,12 +52,12 @@ export function MoodHeatmap() {
             ))}
           </div>
           <div
-            className="grid auto-cols-max grid-flow-col gap-1"
+            className="grid auto-cols-max grid-flow-col gap-[3px]"
             role="img"
-            aria-label="최근 20주 동안의 기분 기록"
+            aria-label="최근 1년 동안의 기분 기록"
           >
             {weeks.map((week, wi) => (
-              <div key={wi} className="grid gap-1">
+              <div key={wi} className="grid gap-[3px]">
                 {week.map((day) => {
                   if (day > today) {
                     return <span key={day.getTime()} className="size-3.5" aria-hidden />;

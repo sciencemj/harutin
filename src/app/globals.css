@@ -187,6 +187,55 @@
     radial-gradient(38rem 24rem at -8% 22rem, rgba(124, 144, 112, 0.12), transparent 65%);
 }
 
+/* 집중 모드 — 바닷속 연출 */
+@keyframes swim {
+  from {
+    transform: translateX(-18vw);
+  }
+  to {
+    transform: translateX(112vw);
+  }
+}
+
+@keyframes swim-back {
+  from {
+    transform: translateX(112vw);
+  }
+  to {
+    transform: translateX(-18vw);
+  }
+}
+
+@keyframes fish-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(14px);
+  }
+}
+
+@keyframes bubble-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translateY(-105vh) scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes wave-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

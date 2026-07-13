@@ -67,6 +67,9 @@ interface AppState {
   /** 어제 기분 묻는 팝업을 건너뛴 날짜 ("yyyy-MM-dd") — 같은 날 다시 묻지 않기 */
   moodPromptDismissed?: string;
   setMoodPromptDismissed: (dateKey: string) => void;
+  /** 날짜별 누적 집중 시간(초) */
+  focusLog: Record<string, number>;
+  addFocusSeconds: (dateKey: string, seconds: number) => void;
   setAppleSyncEnabled: (v: boolean) => void;
   setSoundEnabled: (v: boolean) => void;
 
@@ -94,6 +97,7 @@ const initialData = {
   reflections: [] as DailyReflection[],
   categories: seed.categories,
   settings: { userName: "", appleSyncEnabled: false, soundEnabled: true } as AppSettings,
+  focusLog: {} as Record<string, number>,
 };
 
 /** localStorage 값이 손상됐을 때를 대비해 배열/객체 형태를 검증하며 병합한다. */
@@ -121,6 +125,10 @@ function safeMerge(persisted: unknown, current: AppState): AppState {
     lastSyncAt: typeof p.lastSyncAt === "string" ? p.lastSyncAt : undefined,
     moodPromptDismissed:
       typeof p.moodPromptDismissed === "string" ? p.moodPromptDismissed : undefined,
+    focusLog:
+      typeof p.focusLog === "object" && p.focusLog !== null && !Array.isArray(p.focusLog)
+        ? (p.focusLog as Record<string, number>)
+        : {},
   };
 }
 
@@ -267,6 +275,10 @@ export const useAppStore = create<AppState>()(
         }),
       setLastSyncAt: (iso) => set({ lastSyncAt: iso }),
       setMoodPromptDismissed: (dateKey) => set({ moodPromptDismissed: dateKey }),
+      addFocusSeconds: (dateKey, seconds) =>
+        set((s) => ({
+          focusLog: { ...s.focusLog, [dateKey]: (s.focusLog[dateKey] ?? 0) + seconds },
+        })),
       setAppleSyncEnabled: (v) =>
         set((s) => ({ settings: { ...s.settings, appleSyncEnabled: v } })),
       setSoundEnabled: (v) =>
@@ -302,6 +314,7 @@ export const useAppStore = create<AppState>()(
           categories: fresh.categories,
           settings: { userName: "", appleSyncEnabled: false, soundEnabled: true },
           lastSyncAt: undefined,
+          focusLog: {},
         });
       },
     }),
@@ -319,6 +332,7 @@ export const useAppStore = create<AppState>()(
         settings: s.settings,
         lastSyncAt: s.lastSyncAt,
         moodPromptDismissed: s.moodPromptDismissed,
+        focusLog: s.focusLog,
       }),
       // SSR과 첫 클라이언트 렌더를 동일하게 유지한 뒤 마운트 후 수동 hydrate
       skipHydration: true,

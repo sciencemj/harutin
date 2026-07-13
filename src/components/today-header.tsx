@@ -12,9 +12,11 @@ import {
   Sun,
   Sunrise,
   Sunset,
+  Timer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DailyProgress } from "@/components/daily-progress";
+import { FocusOverlay } from "@/components/focus-overlay";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { useAppStore } from "@/lib/store";
 import { formatKoreanDate, getGreeting, todayKey, type Greeting } from "@/lib/date";
@@ -37,6 +39,8 @@ export function TodayHeader({ action }: { action?: React.ReactNode }) {
 
   const now = useNow();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [focusOpen, setFocusOpen] = useState(false);
+  const focusSeconds = useAppStore((s) => s.focusLog[todayKey()] ?? 0);
 
   const greeting = getGreeting(now, userName || undefined);
   const PeriodIcon = PERIOD_ICON[greeting.period];
@@ -66,6 +70,9 @@ export function TodayHeader({ action }: { action?: React.ReactNode }) {
           >
             <Settings />
           </Button>
+          <Button variant="secondary" onClick={() => setFocusOpen(true)}>
+            <Timer data-icon="inline-start" /> 집중
+          </Button>
           {action}
         </div>
       </div>
@@ -83,11 +90,18 @@ export function TodayHeader({ action }: { action?: React.ReactNode }) {
           <CalendarClock className="size-3.5 text-terracotta" aria-hidden />
           남은 일정 <b>{stats.eventsRemaining}</b>
         </span>
+        {focusSeconds > 0 && (
+          <span className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5">
+            <Timer className="size-3.5 text-primary" aria-hidden />
+            집중 <b>{Math.floor(focusSeconds / 60)}</b>분
+          </span>
+        )}
       </div>
 
       <DailyProgress progress={stats.progress} className="mt-5" />
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      {focusOpen && <FocusOverlay onClose={() => setFocusOpen(false)} />}
     </header>
   );
 }

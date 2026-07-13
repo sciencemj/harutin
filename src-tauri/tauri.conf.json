@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "하루틴",
+  "productName": "Harutin",
   "version": "0.1.0",
   "identifier": "dev.sciencemj.harutin",
   "build": {

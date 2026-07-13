@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>CFBundleDisplayName</key>
+  <string>하루틴</string>
+  <key>CFBundleName</key>
+  <string>하루틴</string>
   <key>NSCalendarsFullAccessUsageDescription</key>
   <string>Apple 캘린더와 일정을 양방향으로 동기화하기 위해 캘린더 접근 권한이 필요해요.</string>
   <key>NSCalendarsUsageDescription</key>

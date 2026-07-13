@@ -43,7 +43,8 @@ export function MoodHeatmap() {
   return (
     <div>
       <div ref={scrollRef} className="overflow-x-auto pb-1">
-        <div className="w-max">
+        {/* 오늘 셀의 링이 스크롤 경계에서 잘리지 않도록 안쪽 여백 확보 */}
+        <div className="w-max py-0.5 pr-2 pl-0.5">
           <div className="mb-1 grid auto-cols-max grid-flow-col gap-[3px] text-[10px] text-muted-foreground">
             {monthLabels.map((label, i) => (
               <span key={i} className="h-3 w-3.5 overflow-visible whitespace-nowrap">

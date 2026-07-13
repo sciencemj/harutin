@@ -80,6 +80,8 @@ export interface AppSettings {
   userName: string;
   /** Apple 캘린더 양방향 동기화 (Tauri 데스크톱 앱에서만) */
   appleSyncEnabled: boolean;
+  /** 클릭·완료 효과음 */
+  soundEnabled: boolean;
 }
 
 export const TIME_OF_DAY_ORDER: TimeOfDay[] = ["morning", "afternoon", "evening"];

@@ -65,6 +65,7 @@ interface AppState {
   lastSyncAt?: string;
   setLastSyncAt: (iso: string) => void;
   setAppleSyncEnabled: (v: boolean) => void;
+  setSoundEnabled: (v: boolean) => void;
 
   saveReflection: (date: string, data: { mood: Mood }) => void;
 
@@ -89,7 +90,7 @@ const initialData = {
   events: seed.events,
   reflections: [] as DailyReflection[],
   categories: seed.categories,
-  settings: { userName: "", appleSyncEnabled: false } as AppSettings,
+  settings: { userName: "", appleSyncEnabled: false, soundEnabled: true } as AppSettings,
 };
 
 /** localStorage 값이 손상됐을 때를 대비해 배열/객체 형태를 검증하며 병합한다. */
@@ -110,6 +111,8 @@ function safeMerge(persisted: unknown, current: AppState): AppState {
             userName: String((p.settings as Record<string, unknown>).userName ?? ""),
             appleSyncEnabled:
               (p.settings as Record<string, unknown>).appleSyncEnabled === true,
+            soundEnabled:
+              (p.settings as Record<string, unknown>).soundEnabled !== false,
           }
         : current.settings,
     lastSyncAt: typeof p.lastSyncAt === "string" ? p.lastSyncAt : undefined,
@@ -260,6 +263,8 @@ export const useAppStore = create<AppState>()(
       setLastSyncAt: (iso) => set({ lastSyncAt: iso }),
       setAppleSyncEnabled: (v) =>
         set((s) => ({ settings: { ...s.settings, appleSyncEnabled: v } })),
+      setSoundEnabled: (v) =>
+        set((s) => ({ settings: { ...s.settings, soundEnabled: v } })),
 
       saveReflection: (date, data) =>
         set((s) => {
@@ -289,7 +294,7 @@ export const useAppStore = create<AppState>()(
           events: fresh.events,
           reflections: [],
           categories: fresh.categories,
-          settings: { userName: "", appleSyncEnabled: false },
+          settings: { userName: "", appleSyncEnabled: false, soundEnabled: true },
           lastSyncAt: undefined,
         });
       },

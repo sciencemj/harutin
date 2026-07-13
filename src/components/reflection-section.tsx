@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { BookHeart } from "lucide-react";
 import { MoodHeatmap } from "@/components/mood-heatmap";
 import { useAppStore } from "@/lib/store";
+import { sound } from "@/lib/sound";
 import { dateKey, todayKey } from "@/lib/date";
 import { calcDayStats } from "@/lib/selectors";
 import { MOOD_META, type DailyReflection, type Mood } from "@/lib/types";
@@ -64,6 +65,7 @@ export function ReflectionSection() {
 
   function handlePick(m: Mood) {
     saveReflection(today, { mood: m });
+    sound.check();
     toast.success(`오늘의 기분을 남겼어요 ${MOOD_META[m].emoji}`);
   }
 

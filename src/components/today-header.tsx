@@ -85,7 +85,7 @@ export function TodayHeader({ action }: { action?: React.ReactNode }) {
         </span>
       </div>
 
-      <DailyProgress progress={stats.progress} className="mt-5 max-w-xl" />
+      <DailyProgress progress={stats.progress} className="mt-5" />
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </header>

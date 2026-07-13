@@ -37,6 +37,7 @@ import { TodoForm } from "@/components/forms/todo-form";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { useAppStore, findCategory } from "@/lib/store";
+import { sound } from "@/lib/sound";
 import { parseDateKey, todayKey } from "@/lib/date";
 import { sortTodos, todoBucket, type TodoBucket } from "@/lib/selectors";
 import { PRIORITY_LABEL, type Category, type Priority, type Todo } from "@/lib/types";
@@ -92,7 +93,11 @@ function TodoItem({
     >
       <button
         type="button"
-        onClick={() => toggleTodo(todo.id)}
+        onClick={() => {
+          if (todo.done) sound.uncheck();
+          else sound.check();
+          toggleTodo(todo.id);
+        }}
         aria-pressed={todo.done}
         aria-label={`${todo.title} ${todo.done ? "완료 취소" : "완료"}`}
         className={cn(

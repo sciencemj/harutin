@@ -11,6 +11,7 @@ import { TodoSection } from "@/components/todo-section";
 import { ScheduleSection, NextEventCard } from "@/components/schedule-section";
 import { ReflectionSection } from "@/components/reflection-section";
 import { useAppStore } from "@/lib/store";
+import { sound } from "@/lib/sound";
 import { runSync } from "@/lib/sync/engine";
 
 function LoadingSkeleton() {
@@ -42,6 +43,15 @@ export default function Home() {
     const t = setInterval(() => runSync().catch(() => {}), 5 * 60_000);
     return () => clearInterval(t);
   }, [hasHydrated]);
+
+  // 모든 버튼 클릭에 아주 짧은 틱 효과음
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if ((e.target as HTMLElement | null)?.closest?.("button")) sound.click();
+    };
+    document.addEventListener("click", handler, { capture: true });
+    return () => document.removeEventListener("click", handler, { capture: true });
+  }, []);
 
   if (!hasHydrated) {
     return <LoadingSkeleton />;

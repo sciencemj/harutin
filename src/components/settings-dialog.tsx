@@ -44,6 +44,8 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
   const resetData = useAppStore((s) => s.resetData);
   const appleSyncEnabled = useAppStore((s) => s.settings.appleSyncEnabled);
   const setAppleSyncEnabled = useAppStore((s) => s.setAppleSyncEnabled);
+  const soundEnabled = useAppStore((s) => s.settings.soundEnabled);
+  const setSoundEnabled = useAppStore((s) => s.setSoundEnabled);
   const lastSyncAt = useAppStore((s) => s.lastSyncAt);
 
   const [name, setName] = useState(userName);
@@ -103,6 +105,20 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
               maxLength={20}
             />
           </div>
+          <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-muted/50 p-3">
+            <div>
+              <p className="text-sm font-medium">효과음</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                클릭·완료할 때 작은 소리를 내요.
+              </p>
+            </div>
+            <Switch
+              checked={soundEnabled}
+              onCheckedChange={setSoundEnabled}
+              aria-label="효과음 켜기"
+            />
+          </div>
+
           {isTauri() && (
             <div className="space-y-2.5 rounded-xl border border-border bg-muted/50 p-3">
               <div className="flex items-center justify-between gap-2">

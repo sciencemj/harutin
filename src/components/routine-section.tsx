@@ -25,6 +25,7 @@ import { RoutineForm } from "@/components/forms/routine-form";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { useAppStore } from "@/lib/store";
+import { sound } from "@/lib/sound";
 import { calcStreak, isRoutineScheduledOn, todayKey } from "@/lib/date";
 import {
   TIME_OF_DAY_LABEL,
@@ -43,15 +44,16 @@ const TIME_ICON: Record<TimeOfDay, typeof Sun> = {
 function RoutineCard({
   routine,
   today,
+  onToggle,
   onEdit,
   onDelete,
 }: {
   routine: Routine;
   today: string;
+  onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const toggleRoutine = useAppStore((s) => s.toggleRoutine);
   const done = routine.completedDates.includes(today);
   const streak = calcStreak(routine, new Date());
 
@@ -65,7 +67,7 @@ function RoutineCard({
     >
       <button
         type="button"
-        onClick={() => toggleRoutine(routine.id, today)}
+        onClick={onToggle}
         aria-pressed={done}
         aria-label={`${routine.name} ${done ? "완료 취소" : "완료"}`}
         className={cn(
@@ -120,6 +122,7 @@ function RoutineCard({
 
 export function RoutineSection() {
   const routines = useAppStore((s) => s.routines);
+  const toggleRoutine = useAppStore((s) => s.toggleRoutine);
   const deleteRoutine = useAppStore((s) => s.deleteRoutine);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -132,6 +135,20 @@ export function RoutineSection() {
   const resting = routines.filter((r) => !isRoutineScheduledOn(r, now));
   const doneCount = todays.filter((r) => r.completedDates.includes(today)).length;
   const allDone = todays.length > 0 && doneCount === todays.length;
+
+  function handleToggle(routine: (typeof routines)[number]) {
+    const wasDone = routine.completedDates.includes(today);
+    toggleRoutine(routine.id, today);
+    if (wasDone) {
+      sound.uncheck();
+      return;
+    }
+    const remaining = todays.filter(
+      (r) => r.id !== routine.id && !r.completedDates.includes(today)
+    ).length;
+    if (remaining === 0) sound.celebrate();
+    else sound.check();
+  }
 
   return (
     <section id="routines" aria-labelledby="routines-title" className="scroll-mt-6">
@@ -192,6 +209,7 @@ export function RoutineSection() {
                       key={r.id}
                       routine={r}
                       today={today}
+                      onToggle={() => handleToggle(r)}
                       onEdit={() => {
                         setEditing(r);
                         setFormOpen(true);

@@ -246,6 +246,17 @@
   }
 }
 
+/* 버튼 속 작은 물결 — 살짝만 오르내린다 */
+@keyframes wave-bob-sm {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2.5px);
+  }
+}
+
 /* 수면 위 부유물(배·오리)의 흔들림 */
 @keyframes surface-rock {
   0%,

@@ -75,24 +75,12 @@ export function TodayHeader({ action }: { action?: React.ReactNode }) {
             onClick={() => setFocusOpen(true)}
             className="group relative overflow-hidden"
           >
-            {/* hover 시 버튼 안에 물이 차오르며 찰랑인다 */}
+            {/* hover 시 버튼 안에 물이 차오르며 잔잔하게 출렁인다 */}
             <span
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-0 bg-[#7fa3ac]/45 transition-[height] duration-500 ease-out group-hover:h-[65%]"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-0 rounded-t-[40%] border-t border-[#FBF7EE]/50 bg-[#7fa3ac]/45 transition-[height] duration-500 ease-out group-hover:h-[60%]"
+              style={{ animation: "wave-bob-sm 1.8s ease-in-out infinite" }}
               aria-hidden
-            >
-              <svg
-                className="absolute -top-1.5 left-0 h-2 w-[200%]"
-                style={{ animation: "wave-slide 2.2s linear infinite" }}
-                viewBox="0 0 120 8"
-                preserveAspectRatio="none"
-              >
-                <path
-                  d="M0 4 Q7.5 0 15 4 T30 4 T45 4 T60 4 T75 4 T90 4 T105 4 T120 4 V8 H0 Z"
-                  fill="#7fa3ac"
-                  opacity="0.7"
-                />
-              </svg>
-            </span>
+            />
             <Timer data-icon="inline-start" className="relative z-10" />
             <span className="relative z-10">집중</span>
           </Button>

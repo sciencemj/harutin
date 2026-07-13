@@ -36,3 +36,4 @@ jobs:
           releaseBody: "새 버전이에요. 앱이 스스로 업데이트를 안내합니다."
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: true

@@ -67,4 +67,50 @@ export const sound = {
       tone(f, { start: i * 0.09, dur: 0.2, gain: 0.09 })
     );
   },
+  /** 집중 모드 — 물이 차오르는 소리 (노이즈 스웰) */
+  waterRise() {
+    if (!enabled()) return;
+    waterWhoosh(true);
+  },
+  /** 집중 모드 — 물이 빠지는 소리 */
+  waterFall() {
+    if (!enabled()) return;
+    waterWhoosh(false);
+  },
 };
+
+let noiseCache: AudioBuffer | null = null;
+
+function noiseBuffer(c: AudioContext): AudioBuffer {
+  if (noiseCache) return noiseCache;
+  const buf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  noiseCache = buf;
+  return buf;
+}
+
+/** 로우패스 필터를 스윕한 화이트노이즈 — 파도가 밀려오고 빠지는 소리 */
+function waterWhoosh(rise: boolean) {
+  const c = audioCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const dur = 1.8;
+  const src = c.createBufferSource();
+  src.buffer = noiseBuffer(c);
+  src.loop = true;
+  const filter = c.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.Q.value = 0.8;
+  filter.frequency.setValueAtTime(rise ? 350 : 950, t);
+  filter.frequency.linearRampToValueAtTime(rise ? 950 : 250, t + dur);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.11, t + 0.4);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(filter);
+  filter.connect(g);
+  g.connect(c.destination);
+  src.start(t);
+  src.stop(t + dur + 0.1);
+}

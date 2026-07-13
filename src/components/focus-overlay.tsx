@@ -37,6 +37,18 @@ const SEA_CREATURES: {
   { emoji: "🐋", top: "55%", dur: 70, delay: -25, size: "text-6xl", bob: 6.5 },
   { emoji: "🐟", top: "80%", dur: 30, delay: -16, size: "text-xl", back: true, bob: 3 },
   { emoji: "🐠", top: "15%", dur: 38, delay: -33, size: "text-2xl", bob: 4.4 },
+  { emoji: "🐬", top: "10%", dur: 24, delay: -9, size: "text-4xl", bob: 3.4 },
+  { emoji: "🦈", top: "42%", dur: 58, delay: -40, size: "text-4xl", back: true, bob: 5.8 },
+  { emoji: "🐙", top: "68%", dur: 48, delay: -22, size: "text-3xl", bob: 4.9 },
+  { emoji: "🪼", top: "30%", dur: 64, delay: -15, size: "text-2xl", back: true, bob: 6.2 },
+  { emoji: "🦐", top: "86%", dur: 36, delay: -28, size: "text-lg", back: true, bob: 2.8 },
+  { emoji: "🐟", top: "52%", dur: 22, delay: -12, size: "text-lg", bob: 2.6 },
+];
+
+/** 수면에 떠다니는 것들 — 고무 오리와 돛단배 */
+const FLOATERS: { emoji: string; dur: number; delay: number; size: string; back?: boolean; rock: number }[] = [
+  { emoji: "⛵", dur: 75, delay: -30, size: "text-4xl", rock: 4.5 },
+  { emoji: "🐥", dur: 50, delay: -12, size: "text-2xl", back: true, rock: 2.8 },
 ];
 
 const BUBBLES = [
@@ -67,9 +79,12 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
   const accumRef = useRef(0); // 아직 스토어에 안 쓴 집중 초
   const [, force] = useState(0);
 
-  // 등장: 다음 프레임에 물을 채워 transition 발동
+  // 등장: 다음 프레임에 물을 채워 transition 발동 + 물소리
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setFilled(true));
+    const raf = requestAnimationFrame(() => {
+      setFilled(true);
+      sound.waterRise();
+    });
     return () => cancelAnimationFrame(raf);
   }, []);
 
@@ -111,6 +126,7 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
     }
     setDraining(true);
     setFilled(false);
+    sound.waterFall();
     setTimeout(onClose, 1700);
   }
 
@@ -150,20 +166,68 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
       >
         <div className="absolute inset-0 bg-gradient-to-b from-[#3d6a74] via-[#2d5460] to-[#1d3b47]" />
 
-        {/* 물결 — 물 표면 */}
-        <div className="absolute inset-x-0 top-0 h-6 overflow-hidden" aria-hidden>
+        {/* 물결 — 세 겹 파도가 서로 다른 속도로 엇갈리며 찰랑인다 */}
+        <div
+          className="absolute inset-x-0 top-0 h-10 overflow-visible"
+          style={{ animation: "wave-bob 3.2s ease-in-out infinite" }}
+          aria-hidden
+        >
           <svg
-            className="absolute top-0 left-0 h-6 w-[200%]"
-            style={{ animation: "wave-slide 9s linear infinite" }}
-            viewBox="0 0 1200 24"
+            className="absolute -top-2 left-0 h-9 w-[200%]"
+            style={{ animation: "wave-slide 6s linear infinite" }}
+            viewBox="0 0 1200 36"
             preserveAspectRatio="none"
           >
             <path
-              d="M0 12 Q75 0 150 12 T300 12 T450 12 T600 12 T750 12 T900 12 T1050 12 T1200 12 V0 H0 Z"
+              d="M0 18 Q75 0 150 18 T300 18 T450 18 T600 18 T750 18 T900 18 T1050 18 T1200 18 V0 H0 Z"
               fill="#FBF7EE"
-              opacity="0.25"
+              opacity="0.3"
             />
           </svg>
+          <svg
+            className="absolute -top-1 left-0 h-8 w-[200%]"
+            style={{ animation: "wave-slide-back 10s linear infinite" }}
+            viewBox="0 0 1200 32"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 16 Q100 2 200 16 T400 16 T600 16 T800 16 T1000 16 T1200 16 V0 H0 Z"
+              fill="#FBF7EE"
+              opacity="0.18"
+            />
+          </svg>
+          <svg
+            className="absolute top-0 left-0 h-7 w-[200%]"
+            style={{ animation: "wave-slide 15s linear infinite" }}
+            viewBox="0 0 1200 28"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 14 Q60 3 120 14 T240 14 T360 14 T480 14 T600 14 T720 14 T840 14 T960 14 T1080 14 T1200 14 V0 H0 Z"
+              fill="#7c9070"
+              opacity="0.2"
+            />
+          </svg>
+
+          {/* 수면 위 — 돛단배와 고무 오리 */}
+          {FLOATERS.map((f, i) => (
+            <span
+              key={i}
+              className="absolute left-0"
+              style={{
+                top: "-26px",
+                animation: `${f.back ? "swim-back" : "swim"} ${f.dur}s linear infinite`,
+                animationDelay: `${f.delay}s`,
+              }}
+            >
+              <span
+                className={cn("inline-block", f.size)}
+                style={{ animation: `surface-rock ${f.rock}s ease-in-out infinite` }}
+              >
+                {f.emoji}
+              </span>
+            </span>
+          ))}
         </div>
 
         {/* 물고기들 */}

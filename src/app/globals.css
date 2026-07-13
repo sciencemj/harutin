@@ -236,6 +236,37 @@
   }
 }
 
+@keyframes wave-slide-back {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* 수면 전체가 오르내리는 찰랑임 */
+@keyframes wave-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(9px);
+  }
+}
+
+/* 수면 위 부유물(배·오리)의 흔들림 */
+@keyframes surface-rock {
+  0%,
+  100% {
+    transform: rotate(-5deg) translateY(0);
+  }
+  50% {
+    transform: rotate(5deg) translateY(5px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

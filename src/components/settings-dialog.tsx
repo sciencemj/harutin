@@ -20,6 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useAppStore } from "@/lib/store";
+import type { Density } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { appleCalendarProvider } from "@/lib/sync/apple-calendar";
 import { runSync } from "@/lib/sync/engine";
 import { checkForUpdate } from "@/lib/updater";
@@ -48,6 +50,8 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
   const setAppleSyncEnabled = useAppStore((s) => s.setAppleSyncEnabled);
   const soundEnabled = useAppStore((s) => s.settings.soundEnabled);
   const setSoundEnabled = useAppStore((s) => s.setSoundEnabled);
+  const density = useAppStore((s) => s.settings.density);
+  const setDensity = useAppStore((s) => s.setDensity);
   const lastSyncAt = useAppStore((s) => s.lastSyncAt);
 
   const [name, setName] = useState(userName);
@@ -120,6 +124,41 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
               maxLength={20}
             />
           </div>
+          <div className="rounded-xl border border-border bg-muted/50 p-3">
+            <p className="text-sm font-medium">화면 밀도</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              여유롭게를 고르면 카드와 섹션 사이가 넉넉해져요.
+            </p>
+            <div
+              className="mt-2 flex rounded-full border border-border bg-card p-0.5"
+              role="group"
+              aria-label="화면 밀도 선택"
+            >
+              {(
+                [
+                  { value: "cozy", label: "아늑하게" },
+                  { value: "spacious", label: "여유롭게" },
+                ] as { value: Density; label: string }[]
+              ).map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  aria-pressed={density === o.value}
+                  onClick={() => setDensity(o.value)}
+                  className={cn(
+                    "flex-1 rounded-full px-3 py-1 text-xs transition-colors",
+                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                    density === o.value
+                      ? "bg-primary font-medium text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-muted/50 p-3">
             <div>
               <p className="text-sm font-medium">효과음</p>

@@ -34,6 +34,7 @@ function LoadingSkeleton() {
 
 export default function Home() {
   const hasHydrated = useAppStore((s) => s.hasHydrated);
+  const density = useAppStore((s) => s.settings.density);
   const today = useToday();
   const prevTodayRef = useRef(today);
 
@@ -82,7 +83,7 @@ export default function Home() {
   const inTauri = isTauri();
 
   return (
-    <div className="min-h-dvh">
+    <div className="min-h-dvh" data-density={density}>
       {/* 오버레이 타이틀바: 창 드래그 영역 (신호등 버튼 높이만큼) */}
       {inTauri && <div data-tauri-drag-region className="fixed inset-x-0 top-0 z-50 h-7" />}
       <AppSidebar topInset={inTauri} />
@@ -90,7 +91,7 @@ export default function Home() {
       <MoodPrompt />
 
       <main className="pb-28 lg:pb-12 lg:pl-60">
-        <div className="mx-auto w-full max-w-5xl space-y-8 px-4 py-6 sm:px-6 lg:py-10">
+        <div className="mx-auto w-full max-w-5xl space-y-[var(--sec-gap)] px-4 py-6 sm:px-6 lg:py-10">
           <TodayHeader action={<QuickAdd />} />
 
           {/* 모바일에서만 보이는 다음 일정 요약 */}
@@ -98,8 +99,8 @@ export default function Home() {
             <NextEventCard />
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-5">
-            <div className="space-y-8 lg:col-span-3">
+          <div className="grid gap-[var(--sec-gap)] lg:grid-cols-5">
+            <div className="space-y-[var(--sec-gap)] lg:col-span-3">
               <RoutineSection />
               <TodoSection />
             </div>

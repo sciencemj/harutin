@@ -72,6 +72,7 @@ interface AppState {
   addFocusSeconds: (dateKey: string, seconds: number) => void;
   setAppleSyncEnabled: (v: boolean) => void;
   setSoundEnabled: (v: boolean) => void;
+  setDensity: (d: AppSettings["density"]) => void;
 
   saveReflection: (date: string, data: { mood: Mood }) => void;
 
@@ -96,7 +97,7 @@ const initialData = {
   events: seed.events,
   reflections: [] as DailyReflection[],
   categories: seed.categories,
-  settings: { userName: "", appleSyncEnabled: false, soundEnabled: true } as AppSettings,
+  settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, density: "cozy" } as AppSettings,
   focusLog: {} as Record<string, number>,
 };
 
@@ -120,6 +121,10 @@ function safeMerge(persisted: unknown, current: AppState): AppState {
               (p.settings as Record<string, unknown>).appleSyncEnabled === true,
             soundEnabled:
               (p.settings as Record<string, unknown>).soundEnabled !== false,
+            density:
+              (p.settings as Record<string, unknown>).density === "spacious"
+                ? "spacious"
+                : "cozy",
           }
         : current.settings,
     lastSyncAt: typeof p.lastSyncAt === "string" ? p.lastSyncAt : undefined,
@@ -283,6 +288,7 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ settings: { ...s.settings, appleSyncEnabled: v } })),
       setSoundEnabled: (v) =>
         set((s) => ({ settings: { ...s.settings, soundEnabled: v } })),
+      setDensity: (d) => set((s) => ({ settings: { ...s.settings, density: d } })),
 
       saveReflection: (date, data) =>
         set((s) => {
@@ -312,7 +318,7 @@ export const useAppStore = create<AppState>()(
           events: fresh.events,
           reflections: [],
           categories: fresh.categories,
-          settings: { userName: "", appleSyncEnabled: false, soundEnabled: true },
+          settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, density: "cozy" },
           lastSyncAt: undefined,
           focusLog: {},
         });

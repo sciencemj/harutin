@@ -76,12 +76,16 @@ export interface Category {
   color: string;
 }
 
+export type Density = "cozy" | "spacious";
+
 export interface AppSettings {
   userName: string;
   /** Apple 캘린더 양방향 동기화 (Tauri 데스크톱 앱에서만) */
   appleSyncEnabled: boolean;
   /** 클릭·완료 효과음 */
   soundEnabled: boolean;
+  /** 화면 밀도 — cozy(기본) / spacious(여유) */
+  density: Density;
 }
 
 export const TIME_OF_DAY_ORDER: TimeOfDay[] = ["morning", "afternoon", "evening"];

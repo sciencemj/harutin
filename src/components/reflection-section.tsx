@@ -74,7 +74,7 @@ export function ReflectionSection() {
     <section
       id="reflection"
       aria-labelledby="reflection-title"
-      className="scroll-mt-6 rounded-3xl bg-cream/80 p-5 sm:p-7"
+      className="scroll-mt-6 rounded-3xl bg-cream/80 p-[var(--sect-pad)] sm:p-[calc(var(--sect-pad)+0.5rem)]"
     >
       <div className="mb-4 flex items-center gap-2">
         <BookHeart className="size-5 text-terracotta" aria-hidden />

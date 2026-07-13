@@ -61,7 +61,7 @@ function RoutineCard({
   return (
     <div
       className={cn(
-        "group flex items-center gap-3 rounded-2xl border bg-card p-3 transition-all duration-300",
+        "group flex items-center gap-3 rounded-2xl border bg-card p-[var(--card-pad)] transition-all duration-300",
         "hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(95,115,85,0.08)]",
         done && "border-sage/50 bg-sage-soft/70"
       )}
@@ -153,7 +153,7 @@ export function RoutineSection() {
 
   return (
     <section id="routines" aria-labelledby="routines-title" className="scroll-mt-6">
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-[var(--head-gap)] flex items-center justify-between">
         <h2 id="routines-title" className="font-serif text-lg font-bold">
           오늘의 루틴
           <span className="ml-2 align-middle text-sm font-normal text-muted-foreground">
@@ -193,7 +193,7 @@ export function RoutineSection() {
           }}
         />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-[calc(var(--list-gap)*2)]">
           {TIME_OF_DAY_ORDER.map((t) => {
             const group = todays.filter((r) => r.timeOfDay === t);
             if (group.length === 0) return null;
@@ -204,7 +204,7 @@ export function RoutineSection() {
                   <TimeIcon className="size-3.5" aria-hidden />
                   {TIME_OF_DAY_LABEL[t]}
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-[var(--list-gap)]">
                   {group.map((r) => (
                     <RoutineCard
                       key={r.id}

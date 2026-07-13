@@ -87,7 +87,7 @@ function TodoItem({
   return (
     <div
       className={cn(
-        "group flex items-start gap-2.5 rounded-2xl border bg-card p-3 transition-all duration-300",
+        "group flex items-start gap-2.5 rounded-2xl border bg-card p-[var(--card-pad)] transition-all duration-300",
         "hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(95,115,85,0.08)]",
         todo.done && "border-transparent bg-card/60"
       )}
@@ -271,7 +271,7 @@ export function TodoSection() {
 
   return (
     <section id="todos" aria-labelledby="todos-title" className="scroll-mt-6">
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-[var(--head-gap)] flex items-center justify-between">
         <h2 id="todos-title" className="font-serif text-lg font-bold">
           오늘의 할 일
           <span className="ml-2 align-middle text-sm font-normal text-muted-foreground">
@@ -389,7 +389,7 @@ export function TodoSection() {
           />
         )
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-[var(--list-gap)]">
           {filtered.map((t, i) => (
             <TodoItem
               key={t.id}
@@ -422,7 +422,7 @@ export function TodoSection() {
             오늘 완료한 일 {doneToday.length}개
           </button>
           {showDoneToday && (
-            <div className="mt-2 space-y-2">
+            <div className="mt-2 space-y-[var(--list-gap)]">
               {doneToday.map((t) => (
                 <TodoItem
                   key={t.id}

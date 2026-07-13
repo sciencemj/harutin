@@ -90,7 +90,7 @@ function TimelineItem({
       </div>
 
       {/* 내용 */}
-      <div className={cn("min-w-0", !isLast && "pb-6", past && "opacity-60")}>
+      <div className={cn("min-w-0", !isLast && "pb-[calc(var(--list-gap)*3)]", past && "opacity-60")}>
         <div className="flex flex-wrap items-center gap-1.5">
           <p className="text-sm font-bold">{event.title}</p>
           {status === "ongoing" && (
@@ -214,7 +214,7 @@ export function ScheduleSection() {
       </div>
 
       {/* 하루 일정 타임라인 카드 */}
-      <div className="rounded-3xl border bg-card p-5 sm:p-6">
+      <div className="rounded-3xl border bg-card p-[var(--sect-pad)] sm:p-[calc(var(--sect-pad)+0.25rem)]">
         <p className="text-xs font-bold tracking-wide text-primary">시간의 흐름</p>
         <div className="mt-1 mb-6 flex items-start justify-between gap-2">
           <h2 id="calendar-title" className="font-serif text-xl font-bold sm:text-2xl">

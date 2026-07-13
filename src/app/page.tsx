@@ -13,6 +13,7 @@ import { ReflectionSection } from "@/components/reflection-section";
 import { useAppStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
 import { runSync } from "@/lib/sync/engine";
+import { checkForUpdate } from "@/lib/updater";
 
 function LoadingSkeleton() {
   return (
@@ -42,6 +43,12 @@ export default function Home() {
     runSync().catch((e) => console.warn("sync failed:", e));
     const t = setInterval(() => runSync().catch(() => {}), 5 * 60_000);
     return () => clearInterval(t);
+  }, [hasHydrated]);
+
+  // 시작 시 GitHub Releases에서 새 버전 확인
+  useEffect(() => {
+    if (!hasHydrated || !isTauri()) return;
+    checkForUpdate().catch((e) => console.warn("update check failed:", e));
   }, [hasHydrated]);
 
   // 모든 버튼 클릭에 아주 짧은 틱 효과음

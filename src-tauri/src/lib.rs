@@ -4,7 +4,10 @@ mod storage;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  let builder = tauri::Builder::default().setup(|app| {
+  let builder = tauri::Builder::default()
+    .plugin(tauri_plugin_updater::Builder::new().build())
+    .plugin(tauri_plugin_process::init())
+    .setup(|app| {
     if cfg!(debug_assertions) {
       app.handle().plugin(
         tauri_plugin_log::Builder::default()

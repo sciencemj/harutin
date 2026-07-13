@@ -10,6 +10,7 @@ import {
   Sun,
 } from "lucide-react";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -20,7 +21,16 @@ const NAV_ITEMS = [
   { id: "reflection", icon: BookHeart, label: "기록" },
 ];
 
+const TAB_IDS = ["routines", "todos", "calendar", "reflection"] as const;
+
 export function scrollToSection(id: string) {
+  // 탭 보기에서는 해당 탭으로 전환하고 위로 올린다
+  const { settings, setActiveTab } = useAppStore.getState();
+  if (settings.viewMode === "tabs" && (TAB_IDS as readonly string[]).includes(id)) {
+    setActiveTab(id as (typeof TAB_IDS)[number]);
+    document.getElementById("top")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 

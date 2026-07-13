@@ -76,7 +76,8 @@ export interface Category {
   color: string;
 }
 
-export type Density = "cozy" | "spacious";
+export type ViewMode = "all" | "tabs";
+export type ActiveTab = "routines" | "todos" | "calendar" | "reflection";
 
 export interface AppSettings {
   userName: string;
@@ -84,8 +85,8 @@ export interface AppSettings {
   appleSyncEnabled: boolean;
   /** 클릭·완료 효과음 */
   soundEnabled: boolean;
-  /** 화면 밀도 — cozy(기본) / spacious(여유) */
-  density: Density;
+  /** 보기 방식 — all(한눈에) / tabs(탭으로 나눠 여유롭게) */
+  viewMode: ViewMode;
 }
 
 export const TIME_OF_DAY_ORDER: TimeOfDay[] = ["morning", "afternoon", "evening"];

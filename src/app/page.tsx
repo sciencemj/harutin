@@ -11,6 +11,7 @@ import { TodoSection } from "@/components/todo-section";
 import { ScheduleSection, NextEventCard } from "@/components/schedule-section";
 import { FocusStats } from "@/components/focus-stats";
 import { ReflectionSection } from "@/components/reflection-section";
+import { ViewTabs } from "@/components/view-tabs";
 import { MoodPrompt } from "@/components/mood-prompt";
 import { useAppStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
@@ -34,7 +35,8 @@ function LoadingSkeleton() {
 
 export default function Home() {
   const hasHydrated = useAppStore((s) => s.hasHydrated);
-  const density = useAppStore((s) => s.settings.density);
+  const viewMode = useAppStore((s) => s.settings.viewMode);
+  const activeTab = useAppStore((s) => s.activeTab);
   const today = useToday();
   const prevTodayRef = useRef(today);
 
@@ -83,7 +85,7 @@ export default function Home() {
   const inTauri = isTauri();
 
   return (
-    <div className="min-h-dvh" data-density={density}>
+    <div className="min-h-dvh">
       {/* 오버레이 타이틀바: 창 드래그 영역 (신호등 버튼 높이만큼) */}
       {inTauri && <div data-tauri-drag-region className="fixed inset-x-0 top-0 z-50 h-7" />}
       <AppSidebar topInset={inTauri} />
@@ -99,18 +101,37 @@ export default function Home() {
             <NextEventCard />
           </div>
 
-          <div className="grid gap-[var(--sec-gap)] lg:grid-cols-5">
-            <div className="space-y-[var(--sec-gap)] lg:col-span-3">
-              <RoutineSection />
-              <TodoSection />
-            </div>
-            <div className="lg:col-span-2">
-              <ScheduleSection />
-              <FocusStats />
-            </div>
-          </div>
+          {viewMode === "tabs" ? (
+            <>
+              <ViewTabs />
+              <div className="mx-auto w-full max-w-3xl">
+                {activeTab === "routines" && <RoutineSection />}
+                {activeTab === "todos" && <TodoSection />}
+                {activeTab === "calendar" && <ScheduleSection />}
+                {activeTab === "reflection" && (
+                  <div className="space-y-[var(--sec-gap)]">
+                    <ReflectionSection />
+                    <FocusStats />
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid gap-[var(--sec-gap)] lg:grid-cols-5">
+                <div className="space-y-[var(--sec-gap)] lg:col-span-3">
+                  <RoutineSection />
+                  <TodoSection />
+                </div>
+                <div className="lg:col-span-2">
+                  <ScheduleSection />
+                  <FocusStats />
+                </div>
+              </div>
 
-          <ReflectionSection />
+              <ReflectionSection />
+            </>
+          )}
 
           <p className="pb-2 text-center font-serif text-sm text-muted-foreground">
             오늘도 나의 속도로, 한 걸음씩. 🍃

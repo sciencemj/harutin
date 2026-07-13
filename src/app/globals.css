@@ -105,14 +105,6 @@
   --sect-pad: 1.25rem; /* 큰 영역(하루 마무리 등) 안쪽 여백 */
 }
 
-/* 여유롭게 — 설정에서 선택 */
-[data-density="spacious"] {
-  --sec-gap: 3.5rem;
-  --list-gap: 1rem;
-  --card-pad: 1.2rem;
-  --head-gap: 1.4rem;
-  --sect-pad: 2.25rem;
-}
 
 .dark {
   --background: oklch(0.145 0 0);

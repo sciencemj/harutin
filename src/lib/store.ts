@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type {
+  ActiveTab,
   AppSettings,
   CalendarEvent,
   Category,
@@ -72,7 +73,10 @@ interface AppState {
   addFocusSeconds: (dateKey: string, seconds: number) => void;
   setAppleSyncEnabled: (v: boolean) => void;
   setSoundEnabled: (v: boolean) => void;
-  setDensity: (d: AppSettings["density"]) => void;
+  setViewMode: (v: AppSettings["viewMode"]) => void;
+  /** 탭 보기에서 현재 탭 (persist 대상 아님) */
+  activeTab: ActiveTab;
+  setActiveTab: (t: ActiveTab) => void;
 
   saveReflection: (date: string, data: { mood: Mood }) => void;
 
@@ -97,7 +101,7 @@ const initialData = {
   events: seed.events,
   reflections: [] as DailyReflection[],
   categories: seed.categories,
-  settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, density: "cozy" } as AppSettings,
+  settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, viewMode: "all" } as AppSettings,
   focusLog: {} as Record<string, number>,
 };
 
@@ -121,10 +125,8 @@ function safeMerge(persisted: unknown, current: AppState): AppState {
               (p.settings as Record<string, unknown>).appleSyncEnabled === true,
             soundEnabled:
               (p.settings as Record<string, unknown>).soundEnabled !== false,
-            density:
-              (p.settings as Record<string, unknown>).density === "spacious"
-                ? "spacious"
-                : "cozy",
+            viewMode:
+              (p.settings as Record<string, unknown>).viewMode === "tabs" ? "tabs" : "all",
           }
         : current.settings,
     lastSyncAt: typeof p.lastSyncAt === "string" ? p.lastSyncAt : undefined,
@@ -143,6 +145,7 @@ export const useAppStore = create<AppState>()(
       ...initialData,
       hasHydrated: false,
       selectedDate: todayKey(),
+      activeTab: "routines" as ActiveTab,
 
       setHasHydrated: (v) => set({ hasHydrated: v }),
       setSelectedDate: (key) => set({ selectedDate: key }),
@@ -288,7 +291,8 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ settings: { ...s.settings, appleSyncEnabled: v } })),
       setSoundEnabled: (v) =>
         set((s) => ({ settings: { ...s.settings, soundEnabled: v } })),
-      setDensity: (d) => set((s) => ({ settings: { ...s.settings, density: d } })),
+      setViewMode: (v) => set((s) => ({ settings: { ...s.settings, viewMode: v } })),
+      setActiveTab: (t) => set({ activeTab: t }),
 
       saveReflection: (date, data) =>
         set((s) => {
@@ -318,7 +322,7 @@ export const useAppStore = create<AppState>()(
           events: fresh.events,
           reflections: [],
           categories: fresh.categories,
-          settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, density: "cozy" },
+          settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, viewMode: "all" },
           lastSyncAt: undefined,
           focusLog: {},
         });

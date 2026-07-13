@@ -56,9 +56,18 @@ export interface CalendarEvent extends BaseEntity {
 export interface DailyReflection extends BaseEntity {
   date: string; // "yyyy-MM-dd"
   mood: Mood;
-  wellDone: string;
-  remember: string;
+  /** 과거 버전에서 쓰던 한 줄 기록 — 지금 UI는 기분만 남긴다 */
+  wellDone?: string;
+  remember?: string;
 }
+
+export const MOOD_META: Record<Mood, { emoji: string; label: string; color: string }> = {
+  1: { emoji: "😞", label: "힘들었어요", color: "#C98A6E" },
+  2: { emoji: "😕", label: "아쉬웠어요", color: "#E0B79A" },
+  3: { emoji: "🙂", label: "무난했어요", color: "#D9D2B4" },
+  4: { emoji: "😊", label: "좋았어요", color: "#A8BCA0" },
+  5: { emoji: "🥰", label: "최고였어요", color: "#5F7355" },
+};
 
 export interface Category {
   id: string;

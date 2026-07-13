@@ -66,7 +66,7 @@ interface AppState {
   setLastSyncAt: (iso: string) => void;
   setAppleSyncEnabled: (v: boolean) => void;
 
-  saveReflection: (date: string, data: { mood: Mood; wellDone: string; remember: string }) => void;
+  saveReflection: (date: string, data: { mood: Mood }) => void;
 
   setUserName: (name: string) => void;
   resetData: () => void;

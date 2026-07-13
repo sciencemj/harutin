@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileNavigation } from "@/components/mobile-nav";
@@ -14,6 +14,7 @@ import { useAppStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
 import { runSync } from "@/lib/sync/engine";
 import { checkForUpdate } from "@/lib/updater";
+import { useToday } from "@/lib/use-today";
 
 function LoadingSkeleton() {
   return (
@@ -31,6 +32,18 @@ function LoadingSkeleton() {
 
 export default function Home() {
   const hasHydrated = useAppStore((s) => s.hasHydrated);
+  const today = useToday();
+  const prevTodayRef = useRef(today);
+
+  // 자정을 넘기면, 어제의 '오늘'을 보고 있던 캘린더 선택을 새 오늘로 옮긴다
+  useEffect(() => {
+    const prev = prevTodayRef.current;
+    if (prev !== today) {
+      const { selectedDate, setSelectedDate } = useAppStore.getState();
+      if (selectedDate === prev) setSelectedDate(today);
+      prevTodayRef.current = today;
+    }
+  }, [today]);
 
   // localStorage는 마운트 후에만 읽어 SSR과 첫 렌더를 일치시킨다
   useEffect(() => {

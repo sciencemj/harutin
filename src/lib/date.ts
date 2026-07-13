@@ -10,6 +10,12 @@ export function todayKey(): string {
   return dateKey(new Date());
 }
 
+/** ISO 타임스탬프(UTC) → 로컬 기준 "yyyy-MM-dd" */
+export function isoToDateKey(iso: string): string {
+  const d = new Date(iso);
+  return isValid(d) ? dateKey(d) : "";
+}
+
 /** "yyyy-MM-dd" → Date. 잘못된 값이면 null */
 export function parseDateKey(key: string): Date | null {
   const d = parse(key, "yyyy-MM-dd", new Date());

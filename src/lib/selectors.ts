@@ -1,5 +1,11 @@
 import type { CalendarEvent, Routine, Todo } from "./types";
-import { getEventStatus, isRoutineScheduledOn, eventSortKey, parseDateKey } from "./date";
+import {
+  getEventStatus,
+  isRoutineScheduledOn,
+  eventSortKey,
+  isoToDateKey,
+  parseDateKey,
+} from "./date";
 
 export type TodoBucket = "today" | "upcoming" | "done";
 
@@ -48,8 +54,8 @@ export function calcDayStats(
   const todayTodos = todos.filter((t) => {
     const bucket = todoBucket(t, todayKey);
     if (bucket === "today") return true;
-    // 오늘 완료한 항목은 오늘 몫으로 센다
-    return bucket === "done" && (t.completedAt ?? "").slice(0, 10) === todayKey;
+    // 오늘 완료한 항목은 오늘 몫으로 센다 (completedAt은 UTC ISO라 로컬 날짜로 변환해 비교)
+    return bucket === "done" && !!t.completedAt && isoToDateKey(t.completedAt) === todayKey;
   });
   const todosDone = todayTodos.filter((t) => t.done).length;
 

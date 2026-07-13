@@ -26,7 +26,8 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { useAppStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
-import { calcStreak, isRoutineScheduledOn, todayKey } from "@/lib/date";
+import { calcStreak, isRoutineScheduledOn, parseDateKey } from "@/lib/date";
+import { useToday } from "@/lib/use-today";
 import {
   TIME_OF_DAY_LABEL,
   TIME_OF_DAY_ORDER,
@@ -129,8 +130,8 @@ export function RoutineSection() {
   const [editing, setEditing] = useState<Routine | null>(null);
   const [deleting, setDeleting] = useState<Routine | null>(null);
 
-  const today = todayKey();
-  const now = new Date();
+  const today = useToday();
+  const now = parseDateKey(today) ?? new Date();
   const todays = routines.filter((r) => isRoutineScheduledOn(r, now));
   const resting = routines.filter((r) => !isRoutineScheduledOn(r, now));
   const doneCount = todays.filter((r) => r.completedDates.includes(today)).length;

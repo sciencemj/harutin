@@ -38,7 +38,8 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { useAppStore, findCategory } from "@/lib/store";
 import { sound } from "@/lib/sound";
-import { parseDateKey, todayKey } from "@/lib/date";
+import { isoToDateKey, parseDateKey, todayKey } from "@/lib/date";
+import { useToday } from "@/lib/use-today";
 import { sortTodos, todoBucket, type TodoBucket } from "@/lib/selectors";
 import { PRIORITY_LABEL, type Category, type Priority, type Todo } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -228,7 +229,7 @@ export function TodoSection() {
   const [deleting, setDeleting] = useState<Todo | null>(null);
   const [showDoneToday, setShowDoneToday] = useState(false);
 
-  const today = todayKey();
+  const today = useToday();
 
   const counts = useMemo(() => {
     const c: Record<TodoBucket, number> = { today: 0, upcoming: 0, done: 0 };
@@ -249,7 +250,7 @@ export function TodoSection() {
   const doneToday = useMemo(
     () =>
       sortTodos(todos).filter(
-        (t) => t.done && (t.completedAt ?? "").slice(0, 10) === today
+        (t) => t.done && !!t.completedAt && isoToDateKey(t.completedAt) === today
       ),
     [todos, today]
   );

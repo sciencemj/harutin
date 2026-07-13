@@ -7,7 +7,8 @@ import { BookHeart } from "lucide-react";
 import { MoodHeatmap } from "@/components/mood-heatmap";
 import { useAppStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
-import { dateKey, todayKey } from "@/lib/date";
+import { dateKey } from "@/lib/date";
+import { useToday } from "@/lib/use-today";
 import { calcDayStats } from "@/lib/selectors";
 import { MOOD_META, type DailyReflection, type Mood } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -52,7 +53,7 @@ export function ReflectionSection() {
   const reflections = useAppStore((s) => s.reflections);
   const saveReflection = useAppStore((s) => s.saveReflection);
 
-  const today = todayKey();
+  const today = useToday();
   const mood = reflections.find((r) => r.date === today)?.mood ?? null;
   const recordedDays = reflections.length;
   const streak = calcRecordStreak(reflections);

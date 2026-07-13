@@ -36,37 +36,60 @@ export function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+/** 접힐 때 부드럽게 사라지는 라벨 — 아이콘은 제자리에 있고 글자만 접힌다 */
+function CollapsibleLabel({
+  collapsed,
+  className,
+  children,
+}: {
+  collapsed: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className={cn(
+        "overflow-hidden whitespace-nowrap transition-[max-width,opacity,margin-left] duration-300 ease-in-out",
+        collapsed ? "ml-0 max-w-0 opacity-0" : "ml-2.5 max-w-[9.5rem] opacity-100",
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 export function AppSidebar({ topInset = false }: { topInset?: boolean }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const collapsed = useAppStore((s) => s.settings.sidebarCollapsed);
   const setCollapsed = useAppStore((s) => s.setSidebarCollapsed);
 
+  // 아이콘 x좌표 고정: 사이드바(px-3) + 버튼(px-2.5) 패딩이 양쪽 상태에서 동일하다
   const navButtonClass = cn(
-    "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-sidebar-foreground/85 transition-colors",
+    "flex w-full items-center rounded-xl px-2.5 py-2 text-sm text-sidebar-foreground/85 transition-colors",
     "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-    collapsed && "justify-center px-0"
+    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
   );
 
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-sidebar-border bg-sidebar py-6 transition-[width,padding] duration-300 lg:flex",
-        collapsed ? "w-16 px-2" : "w-60 px-4",
+        "fixed inset-y-0 left-0 z-30 hidden flex-col overflow-hidden border-r border-sidebar-border bg-sidebar px-3 py-6 transition-[width] duration-300 ease-in-out lg:flex",
+        collapsed ? "w-[4.25rem]" : "w-60",
         // 오버레이 타이틀바(신호등 버튼) 아래로 로고를 내린다
         topInset && "pt-12"
       )}
     >
-      <div className={cn("mb-8 flex items-center gap-2", collapsed ? "justify-center" : "px-2")}>
-        <span className="text-2xl" aria-hidden>
+      <div className="mb-8 flex items-center px-2.5">
+        <span className="shrink-0 text-2xl" aria-hidden>
           🌿
         </span>
-        {!collapsed && (
-          <div className="min-w-0">
-            <p className="font-serif text-lg leading-tight font-bold">하루틴</p>
-            <p className="text-[11px] text-muted-foreground">나의 하루를 돌보는 자리</p>
-          </div>
-        )}
+        <CollapsibleLabel collapsed={collapsed}>
+          <span className="block font-serif text-lg leading-tight font-bold">하루틴</span>
+          <span className="block text-[11px] text-muted-foreground">
+            나의 하루를 돌보는 자리
+          </span>
+        </CollapsibleLabel>
       </div>
 
       <nav aria-label="주요 메뉴" className="flex flex-col gap-1">
@@ -80,7 +103,7 @@ export function AppSidebar({ topInset = false }: { topInset?: boolean }) {
             className={navButtonClass}
           >
             <item.icon className="size-4 shrink-0" aria-hidden />
-            {!collapsed && item.label}
+            <CollapsibleLabel collapsed={collapsed}>{item.label}</CollapsibleLabel>
           </button>
         ))}
         <button
@@ -91,7 +114,7 @@ export function AppSidebar({ topInset = false }: { topInset?: boolean }) {
           className={navButtonClass}
         >
           <Settings className="size-4 shrink-0" aria-hidden />
-          {!collapsed && "설정"}
+          <CollapsibleLabel collapsed={collapsed}>설정</CollapsibleLabel>
         </button>
       </nav>
 
@@ -105,11 +128,9 @@ export function AppSidebar({ topInset = false }: { topInset?: boolean }) {
         {collapsed ? (
           <PanelLeftOpen className="size-4 shrink-0" aria-hidden />
         ) : (
-          <>
-            <PanelLeftClose className="size-4 shrink-0" aria-hidden />
-            접기
-          </>
+          <PanelLeftClose className="size-4 shrink-0" aria-hidden />
         )}
+        <CollapsibleLabel collapsed={collapsed}>접기</CollapsibleLabel>
       </button>
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />

@@ -98,7 +98,7 @@ export default function Home() {
       <main
         className={cn(
           "pb-28 lg:pb-12",
-          viewMode !== "tabs" && (sidebarCollapsed ? "lg:pl-16" : "lg:pl-60"),
+          viewMode !== "tabs" && (sidebarCollapsed ? "lg:pl-[4.25rem]" : "lg:pl-60"),
           "transition-[padding] duration-300"
         )}
       >

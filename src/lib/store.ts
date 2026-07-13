@@ -64,6 +64,9 @@ interface AppState {
   ) => void;
   lastSyncAt?: string;
   setLastSyncAt: (iso: string) => void;
+  /** 어제 기분 묻는 팝업을 건너뛴 날짜 ("yyyy-MM-dd") — 같은 날 다시 묻지 않기 */
+  moodPromptDismissed?: string;
+  setMoodPromptDismissed: (dateKey: string) => void;
   setAppleSyncEnabled: (v: boolean) => void;
   setSoundEnabled: (v: boolean) => void;
 
@@ -116,6 +119,8 @@ function safeMerge(persisted: unknown, current: AppState): AppState {
           }
         : current.settings,
     lastSyncAt: typeof p.lastSyncAt === "string" ? p.lastSyncAt : undefined,
+    moodPromptDismissed:
+      typeof p.moodPromptDismissed === "string" ? p.moodPromptDismissed : undefined,
   };
 }
 
@@ -261,6 +266,7 @@ export const useAppStore = create<AppState>()(
           };
         }),
       setLastSyncAt: (iso) => set({ lastSyncAt: iso }),
+      setMoodPromptDismissed: (dateKey) => set({ moodPromptDismissed: dateKey }),
       setAppleSyncEnabled: (v) =>
         set((s) => ({ settings: { ...s.settings, appleSyncEnabled: v } })),
       setSoundEnabled: (v) =>
@@ -312,6 +318,7 @@ export const useAppStore = create<AppState>()(
         categories: s.categories,
         settings: s.settings,
         lastSyncAt: s.lastSyncAt,
+        moodPromptDismissed: s.moodPromptDismissed,
       }),
       // SSR과 첫 클라이언트 렌더를 동일하게 유지한 뒤 마운트 후 수동 hydrate
       skipHydration: true,

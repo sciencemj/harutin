@@ -10,6 +10,7 @@ import { RoutineSection } from "@/components/routine-section";
 import { TodoSection } from "@/components/todo-section";
 import { ScheduleSection, NextEventCard } from "@/components/schedule-section";
 import { ReflectionSection } from "@/components/reflection-section";
+import { MoodPrompt } from "@/components/mood-prompt";
 import { useAppStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
 import { runSync } from "@/lib/sync/engine";
@@ -85,6 +86,7 @@ export default function Home() {
       {inTauri && <div data-tauri-drag-region className="fixed inset-x-0 top-0 z-50 h-7" />}
       <AppSidebar topInset={inTauri} />
       <MobileNavigation />
+      <MoodPrompt />
 
       <main className="pb-28 lg:pb-12 lg:pl-60">
         <div className="mx-auto w-full max-w-5xl space-y-8 px-4 py-6 sm:px-6 lg:py-10">

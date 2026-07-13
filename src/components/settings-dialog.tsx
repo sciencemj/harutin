@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { getVersion } from "@tauri-apps/api/app";
 import { isTauri } from "@tauri-apps/api/core";
 import { format } from "date-fns";
 import { RefreshCw } from "lucide-react";
@@ -21,6 +22,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useAppStore } from "@/lib/store";
 import { appleCalendarProvider } from "@/lib/sync/apple-calendar";
 import { runSync } from "@/lib/sync/engine";
+import { checkForUpdate } from "@/lib/updater";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -51,6 +53,19 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState(userName);
   const [confirmReset, setConfirmReset] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [version, setVersion] = useState("");
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+
+  useEffect(() => {
+    if (isTauri()) getVersion().then(setVersion).catch(() => {});
+  }, []);
+
+  function handleCheckUpdate() {
+    setCheckingUpdate(true);
+    checkForUpdate({ notifyUpToDate: true })
+      .catch((e) => toast.error(`업데이트 확인에 실패했어요: ${e}`))
+      .finally(() => setCheckingUpdate(false));
+  }
 
   async function handleSyncToggle(on: boolean) {
     if (!on) {
@@ -155,6 +170,29 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
                   </Button>
                 </div>
               )}
+            </div>
+          )}
+
+          {isTauri() && (
+            <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-muted/50 p-3">
+              <div>
+                <p className="text-sm font-medium">앱 업데이트</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {version ? `현재 버전 v${version}` : "버전 확인 중…"}
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleCheckUpdate}
+                disabled={checkingUpdate}
+              >
+                <RefreshCw
+                  data-icon="inline-start"
+                  className={checkingUpdate ? "animate-spin" : undefined}
+                />
+                {checkingUpdate ? "확인 중" : "업데이트 확인"}
+              </Button>
             </div>
           )}
 

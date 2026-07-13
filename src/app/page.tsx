@@ -9,6 +9,7 @@ import { QuickAdd } from "@/components/quick-add";
 import { RoutineSection } from "@/components/routine-section";
 import { TodoSection } from "@/components/todo-section";
 import { ScheduleSection, NextEventCard } from "@/components/schedule-section";
+import { FocusStats } from "@/components/focus-stats";
 import { ReflectionSection } from "@/components/reflection-section";
 import { MoodPrompt } from "@/components/mood-prompt";
 import { useAppStore } from "@/lib/store";
@@ -104,6 +105,7 @@ export default function Home() {
             </div>
             <div className="lg:col-span-2">
               <ScheduleSection />
+              <FocusStats />
             </div>
           </div>
 

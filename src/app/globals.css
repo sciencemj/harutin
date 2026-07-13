@@ -177,16 +177,6 @@
   animation: gentle-rise 0.45s ease-out both;
 }
 
-/* 배경의 은은한 빛 — 세이지와 살구빛이 종이 위에 스민 느낌 */
-.paper-glow {
-  background-image: radial-gradient(
-      42rem 26rem at 82% -6rem,
-      rgba(232, 180, 140, 0.16),
-      transparent 65%
-    ),
-    radial-gradient(38rem 24rem at -8% 22rem, rgba(124, 144, 112, 0.12), transparent 65%);
-}
-
 /* 집중 모드 — 바닷속 연출 */
 @keyframes swim {
   from {

@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="ko"
       className={`${notoSans.variable} ${gowunBatang.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col paper-glow">
+      <body className="min-h-full flex flex-col">
         {children}
         <Toaster position="top-center" richColors />
       </body>

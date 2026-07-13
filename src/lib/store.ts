@@ -74,6 +74,7 @@ interface AppState {
   setAppleSyncEnabled: (v: boolean) => void;
   setSoundEnabled: (v: boolean) => void;
   setViewMode: (v: AppSettings["viewMode"]) => void;
+  setSidebarCollapsed: (v: boolean) => void;
   /** 탭 보기에서 현재 탭 (persist 대상 아님) */
   activeTab: ActiveTab;
   setActiveTab: (t: ActiveTab) => void;
@@ -101,7 +102,7 @@ const initialData = {
   events: seed.events,
   reflections: [] as DailyReflection[],
   categories: seed.categories,
-  settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, viewMode: "all" } as AppSettings,
+  settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, viewMode: "all", sidebarCollapsed: false } as AppSettings,
   focusLog: {} as Record<string, number>,
 };
 
@@ -127,6 +128,8 @@ function safeMerge(persisted: unknown, current: AppState): AppState {
               (p.settings as Record<string, unknown>).soundEnabled !== false,
             viewMode:
               (p.settings as Record<string, unknown>).viewMode === "tabs" ? "tabs" : "all",
+            sidebarCollapsed:
+              (p.settings as Record<string, unknown>).sidebarCollapsed === true,
           }
         : current.settings,
     lastSyncAt: typeof p.lastSyncAt === "string" ? p.lastSyncAt : undefined,
@@ -292,6 +295,8 @@ export const useAppStore = create<AppState>()(
       setSoundEnabled: (v) =>
         set((s) => ({ settings: { ...s.settings, soundEnabled: v } })),
       setViewMode: (v) => set((s) => ({ settings: { ...s.settings, viewMode: v } })),
+      setSidebarCollapsed: (v) =>
+        set((s) => ({ settings: { ...s.settings, sidebarCollapsed: v } })),
       setActiveTab: (t) => set({ activeTab: t }),
 
       saveReflection: (date, data) =>
@@ -322,7 +327,7 @@ export const useAppStore = create<AppState>()(
           events: fresh.events,
           reflections: [],
           categories: fresh.categories,
-          settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, viewMode: "all" },
+          settings: { userName: "", appleSyncEnabled: false, soundEnabled: true, viewMode: "all", sidebarCollapsed: false },
           lastSyncAt: undefined,
           focusLog: {},
         });

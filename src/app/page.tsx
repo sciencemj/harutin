@@ -11,7 +11,9 @@ import { TodoSection } from "@/components/todo-section";
 import { ScheduleSection, NextEventCard } from "@/components/schedule-section";
 import { FocusStats } from "@/components/focus-stats";
 import { ReflectionSection } from "@/components/reflection-section";
+import { SettingsPanel } from "@/components/settings-dialog";
 import { ViewTabs } from "@/components/view-tabs";
+import { cn } from "@/lib/utils";
 import { MoodPrompt } from "@/components/mood-prompt";
 import { useAppStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
@@ -36,6 +38,7 @@ function LoadingSkeleton() {
 export default function Home() {
   const hasHydrated = useAppStore((s) => s.hasHydrated);
   const viewMode = useAppStore((s) => s.settings.viewMode);
+  const sidebarCollapsed = useAppStore((s) => s.settings.sidebarCollapsed);
   const activeTab = useAppStore((s) => s.activeTab);
   const today = useToday();
   const prevTodayRef = useRef(today);
@@ -88,11 +91,17 @@ export default function Home() {
     <div className="min-h-dvh">
       {/* 오버레이 타이틀바: 창 드래그 영역 (신호등 버튼 높이만큼) */}
       {inTauri && <div data-tauri-drag-region className="fixed inset-x-0 top-0 z-50 h-7" />}
-      <AppSidebar topInset={inTauri} />
+      {viewMode !== "tabs" && <AppSidebar topInset={inTauri} />}
       <MobileNavigation />
       <MoodPrompt />
 
-      <main className="pb-28 lg:pb-12 lg:pl-60">
+      <main
+        className={cn(
+          "pb-28 lg:pb-12",
+          viewMode !== "tabs" && (sidebarCollapsed ? "lg:pl-16" : "lg:pl-60"),
+          "transition-[padding] duration-300"
+        )}
+      >
         <div className="mx-auto w-full max-w-5xl space-y-[var(--sec-gap)] px-4 py-6 sm:px-6 lg:py-10">
           <TodayHeader action={<QuickAdd />} />
 
@@ -113,6 +122,15 @@ export default function Home() {
                     <ReflectionSection />
                     <FocusStats />
                   </div>
+                )}
+                {activeTab === "settings" && (
+                  <section
+                    aria-label="설정"
+                    className="rounded-3xl border bg-card p-[var(--sect-pad)] sm:p-[calc(var(--sect-pad)+0.25rem)]"
+                  >
+                    <h2 className="mb-4 font-serif text-lg font-bold">설정</h2>
+                    <SettingsPanel />
+                  </section>
                 )}
               </div>
             </>

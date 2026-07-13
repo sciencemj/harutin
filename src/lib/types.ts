@@ -77,7 +77,7 @@ export interface Category {
 }
 
 export type ViewMode = "all" | "tabs";
-export type ActiveTab = "routines" | "todos" | "calendar" | "reflection";
+export type ActiveTab = "routines" | "todos" | "calendar" | "reflection" | "settings";
 
 export interface AppSettings {
   userName: string;
@@ -87,6 +87,8 @@ export interface AppSettings {
   soundEnabled: boolean;
   /** 보기 방식 — all(한눈에) / tabs(탭으로 나눠 여유롭게) */
   viewMode: ViewMode;
+  /** 한눈에 보기에서 사이드바 접힘 */
+  sidebarCollapsed: boolean;
 }
 
 export const TIME_OF_DAY_ORDER: TimeOfDay[] = ["morning", "afternoon", "evening"];

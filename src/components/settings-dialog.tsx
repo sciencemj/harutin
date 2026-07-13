@@ -10,7 +10,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -36,13 +35,18 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         {/* 닫힐 때 unmount되어 열 때마다 현재 설정으로 초기화된다 */}
-        <SettingsBody onClose={() => onOpenChange(false)} />
+        <DialogHeader>
+          <DialogTitle className="font-serif">설정</DialogTitle>
+          <DialogDescription>인사말에 쓸 이름과 데이터를 관리해요.</DialogDescription>
+        </DialogHeader>
+        <SettingsPanel onClose={() => onOpenChange(false)} />
       </DialogContent>
     </Dialog>
   );
 }
 
-function SettingsBody({ onClose }: { onClose: () => void }) {
+/** 설정 본문 — 다이얼로그와 탭 보기의 설정 탭에서 공용 */
+export function SettingsPanel({ onClose }: { onClose?: () => void }) {
   const userName = useAppStore((s) => s.settings.userName);
   const setUserName = useAppStore((s) => s.setUserName);
   const resetData = useAppStore((s) => s.resetData);
@@ -104,15 +108,11 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
   function handleSave() {
     setUserName(name.trim());
     toast.success("설정을 저장했어요");
-    onClose();
+    onClose?.();
   }
 
   return (
     <>
-        <DialogHeader>
-          <DialogTitle className="font-serif">설정</DialogTitle>
-          <DialogDescription>인사말에 쓸 이름과 데이터를 관리해요.</DialogDescription>
-        </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="settings-name">이름 (선택)</Label>
@@ -250,12 +250,14 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
             </Button>
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
-            취소
-          </Button>
+        <div className="mt-4 flex justify-end gap-2">
+          {onClose && (
+            <Button variant="ghost" onClick={onClose}>
+              취소
+            </Button>
+          )}
           <Button onClick={handleSave}>저장</Button>
-        </DialogFooter>
+        </div>
 
       <ConfirmDialog
         open={confirmReset}
@@ -266,7 +268,7 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
         onConfirm={() => {
           resetData();
           setConfirmReset(false);
-          onClose();
+          onClose?.();
           toast.success("처음 상태로 되돌렸어요");
         }}
       />

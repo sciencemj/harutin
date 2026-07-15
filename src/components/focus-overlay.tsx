@@ -87,7 +87,18 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
   const lastTickRef = useRef(Date.now());
   const accumMsRef = useRef(0); // 아직 스토어에 안 쓴 집중 시간(ms)
   const pausedRemainingRef = useRef(0);
+  const cancelBellRef = useRef<(() => void) | null>(null);
   const [, force] = useState(0);
+
+  /** 현재 집중 페이즈가 끝나는 시각에 휴식 알림벨 예약 */
+  function scheduleBell() {
+    cancelBellRef.current?.();
+    cancelBellRef.current = null;
+    const s = stateRef.current;
+    if (s.phase !== "focus") return;
+    const delay = (s.phaseEndsAt - Date.now()) / 1000;
+    if (delay > 0) cancelBellRef.current = sound.scheduleBreakBell(delay);
+  }
 
   function commitAccum(minMs: number) {
     if (accumMsRef.current < minMs) return;
@@ -103,6 +114,7 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
     const s = stateRef.current;
     const now = Date.now();
     let cursor = lastTickRef.current;
+    let transitioned = false;
     // 백그라운드로 오래 있었어도 페이즈 전환을 순서대로 처리한다
     for (let guard = 0; guard < 100; guard++) {
       const segmentEnd = Math.min(now, s.phaseEndsAt);
@@ -111,29 +123,36 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
       }
       cursor = segmentEnd;
       if (now < s.phaseEndsAt) break;
+      transitioned = true;
       if (s.phase === "focus") {
+        // 휴식 알림은 예약된 벨이 정시에 울린다
         s.done++;
         s.phase = "break";
         s.phaseEndsAt += BREAK_MS;
-        sound.celebrate();
       } else {
         s.phase = "focus";
         s.phaseEndsAt += FOCUS_MS;
         sound.check();
       }
     }
+    if (transitioned) scheduleBell();
     lastTickRef.current = now;
     commitAccum(COMMIT_MS);
     force((n) => n + 1);
   }
 
-  // 등장: 다음 프레임에 물을 채워 transition 발동 + 물소리
+  // 등장: 다음 프레임에 물을 채워 transition 발동 + 물소리 + 첫 휴식벨 예약
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       setFilled(true);
       sound.waterRise();
+      scheduleBell();
     });
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      cancelBellRef.current?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 1초 화면 갱신 + 포그라운드 복귀 시 즉시 정산
@@ -157,10 +176,13 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
     if (running) {
       settle();
       pausedRemainingRef.current = Math.max(s.phaseEndsAt - Date.now(), 0);
+      cancelBellRef.current?.();
+      cancelBellRef.current = null;
       setRunning(false);
     } else {
       s.phaseEndsAt = Date.now() + pausedRemainingRef.current;
       lastTickRef.current = Date.now();
+      scheduleBell();
       setRunning(true);
     }
   }
@@ -169,6 +191,8 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
     if (draining) return;
     if (running) settle();
     commitAccum(0);
+    cancelBellRef.current?.();
+    cancelBellRef.current = null;
     setDraining(true);
     setFilled(false);
     sound.waterFall();

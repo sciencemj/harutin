@@ -67,6 +67,45 @@ export const sound = {
       tone(f, { start: i * 0.09, dur: 0.2, gain: 0.09 })
     );
   },
+  /**
+   * 휴식 알림벨 예약 — delaySeconds 뒤에 딩-동 벨이 두 번 울린다.
+   * Web Audio 스케줄러는 백그라운드 스로틀의 영향을 받지 않아 정시에 울린다.
+   * 반환값을 호출하면 예약 취소.
+   */
+  scheduleBreakBell(delaySeconds: number): () => void {
+    if (!enabled()) return () => {};
+    const c = audioCtx();
+    if (!c) return () => {};
+    const t = c.currentTime + Math.max(delaySeconds, 0);
+    const oscillators: OscillatorNode[] = [];
+    const bell = (start: number, freq: number) => {
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.exponentialRampToValueAtTime(0.2, start + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0008, start + 1.1);
+      osc.connect(g).connect(c.destination);
+      osc.start(start);
+      osc.stop(start + 1.2);
+      oscillators.push(osc);
+    };
+    // 딩-동, 딩-동
+    bell(t, 1318.51); // E6
+    bell(t + 0.4, 1046.5); // C6
+    bell(t + 1.1, 1318.51);
+    bell(t + 1.5, 1046.5);
+    return () => {
+      for (const o of oscillators) {
+        try {
+          o.stop();
+        } catch {
+          /* 이미 정지됨 */
+        }
+      }
+    };
+  },
   /** 집중 모드 — 물이 차오르는 소리 (노이즈 스웰) */
   waterRise() {
     if (!enabled()) return;

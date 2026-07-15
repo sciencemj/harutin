@@ -349,7 +349,14 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* 타이머 */}
-      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-4 text-[#FBF7EE]">
+      <div
+        className={cn(
+          "relative z-10 flex h-full flex-col items-center justify-center gap-4 text-[#FBF7EE]",
+          // 물이 빠질 때 타이머가 허공에 남지 않게 먼저 사라진다
+          "transition-opacity duration-300",
+          draining && "opacity-0"
+        )}
+      >
         <p className="text-sm tracking-widest opacity-80">
           {t.phase === "focus" ? "집중하는 중" : "잠깐 쉬어가요"}
         </p>

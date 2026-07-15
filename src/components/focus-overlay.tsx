@@ -2,21 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, X } from "lucide-react";
+import { isTauri } from "@tauri-apps/api/core";
 import { useAppStore } from "@/lib/store";
 import { sound } from "@/lib/sound";
 import { todayKey } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
-const FOCUS_SECONDS = 25 * 60;
-const BREAK_SECONDS = 5 * 60;
-/** 집중 시간은 30초 단위로 스토어에 적립 (파일 쓰기 빈도 제한) */
-const COMMIT_EVERY = 30;
+const FOCUS_MS = 25 * 60 * 1000;
+const BREAK_MS = 5 * 60 * 1000;
+/** 집중 시간은 30초 이상 쌓이면 스토어에 적립 (파일 쓰기 빈도 제한) */
+const COMMIT_MS = 30 * 1000;
 
 type Phase = "focus" | "break";
 
 interface TimerState {
   phase: Phase;
-  left: number;
+  /** 현재 페이즈가 끝나는 시각 (epoch ms) */
+  phaseEndsAt: number;
   done: number; // 완료한 포모도로 수
 }
 
@@ -75,9 +77,55 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
   const [draining, setDraining] = useState(false);
   const [running, setRunning] = useState(true);
 
-  const stateRef = useRef<TimerState>({ phase: "focus", left: FOCUS_SECONDS, done: 0 });
-  const accumRef = useRef(0); // 아직 스토어에 안 쓴 집중 초
+  // 벽시계 기반: 인터벌은 화면 갱신용일 뿐, 시간 계산은 timestamp로 한다
+  // (백그라운드에서 WKWebView가 타이머를 스로틀해도 기록이 정확하다)
+  const stateRef = useRef<TimerState>({
+    phase: "focus",
+    phaseEndsAt: Date.now() + FOCUS_MS,
+    done: 0,
+  });
+  const lastTickRef = useRef(Date.now());
+  const accumMsRef = useRef(0); // 아직 스토어에 안 쓴 집중 시간(ms)
+  const pausedRemainingRef = useRef(0);
   const [, force] = useState(0);
+
+  function commitAccum(minMs: number) {
+    if (accumMsRef.current < minMs) return;
+    const seconds = Math.floor(accumMsRef.current / 1000);
+    if (seconds > 0) {
+      addFocusSeconds(todayKey(), seconds);
+      accumMsRef.current -= seconds * 1000;
+    }
+  }
+
+  /** 지난 시간을 벽시계로 정산 — 페이즈 경계를 넘었으면 경계까지만 집중으로 적립 */
+  function settle() {
+    const s = stateRef.current;
+    const now = Date.now();
+    let cursor = lastTickRef.current;
+    // 백그라운드로 오래 있었어도 페이즈 전환을 순서대로 처리한다
+    for (let guard = 0; guard < 100; guard++) {
+      const segmentEnd = Math.min(now, s.phaseEndsAt);
+      if (s.phase === "focus" && segmentEnd > cursor) {
+        accumMsRef.current += segmentEnd - cursor;
+      }
+      cursor = segmentEnd;
+      if (now < s.phaseEndsAt) break;
+      if (s.phase === "focus") {
+        s.done++;
+        s.phase = "break";
+        s.phaseEndsAt += BREAK_MS;
+        sound.celebrate();
+      } else {
+        s.phase = "focus";
+        s.phaseEndsAt += FOCUS_MS;
+        sound.check();
+      }
+    }
+    lastTickRef.current = now;
+    commitAccum(COMMIT_MS);
+    force((n) => n + 1);
+  }
 
   // 등장: 다음 프레임에 물을 채워 transition 발동 + 물소리
   useEffect(() => {
@@ -88,42 +136,39 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // 1초 틱 — 타이머 진행, 집중 시간 적립, 세션 전환
+  // 1초 화면 갱신 + 포그라운드 복귀 시 즉시 정산
   useEffect(() => {
     if (!running || draining) return;
-    const id = setInterval(() => {
-      const s = stateRef.current;
-      if (s.phase === "focus") {
-        accumRef.current++;
-        if (accumRef.current >= COMMIT_EVERY) {
-          addFocusSeconds(todayKey(), accumRef.current);
-          accumRef.current = 0;
-        }
-      }
-      s.left--;
-      if (s.left <= 0) {
-        if (s.phase === "focus") {
-          s.done++;
-          s.phase = "break";
-          s.left = BREAK_SECONDS;
-          sound.celebrate();
-        } else {
-          s.phase = "focus";
-          s.left = FOCUS_SECONDS;
-          sound.check();
-        }
-      }
-      force((n) => n + 1);
-    }, 1000);
-    return () => clearInterval(id);
-  }, [running, draining, addFocusSeconds]);
+    lastTickRef.current = Date.now();
+    const id = setInterval(settle, 1000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") settle();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running, draining]);
+
+  function handlePauseResume() {
+    const s = stateRef.current;
+    if (running) {
+      settle();
+      pausedRemainingRef.current = Math.max(s.phaseEndsAt - Date.now(), 0);
+      setRunning(false);
+    } else {
+      s.phaseEndsAt = Date.now() + pausedRemainingRef.current;
+      lastTickRef.current = Date.now();
+      setRunning(true);
+    }
+  }
 
   function exit() {
     if (draining) return;
-    if (accumRef.current > 0) {
-      addFocusSeconds(todayKey(), accumRef.current);
-      accumRef.current = 0;
-    }
+    if (running) settle();
+    commitAccum(0);
     setDraining(true);
     setFilled(false);
     sound.waterFall();
@@ -141,8 +186,12 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
   }, [draining]);
 
   const t = stateRef.current;
-  const todayFocus = (focusLog[todayKey()] ?? 0) + accumRef.current;
-  const focusMinutes = Math.floor(todayFocus / 60);
+  const secondsLeft = running
+    ? Math.max(0, Math.ceil((t.phaseEndsAt - Date.now()) / 1000))
+    : Math.max(0, Math.ceil(pausedRemainingRef.current / 1000));
+  const todayFocusSec =
+    (focusLog[todayKey()] ?? 0) + Math.floor(accumMsRef.current / 1000);
+  const focusMinutes = Math.floor(todayFocusSec / 60);
 
   return (
     <div
@@ -151,6 +200,10 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
       aria-label="집중 모드"
       className="fixed inset-0 z-[60]"
     >
+      {/* 집중 모드에서도 창 상단 드래그로 이동 가능하게 */}
+      {isTauri() && (
+        <div data-tauri-drag-region className="absolute inset-x-0 top-0 z-30 h-7" />
+      )}
       {/* 어두워진 방 */}
       <div
         className={cn(
@@ -276,7 +329,7 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
         <p className="text-sm tracking-widest opacity-80">
           {t.phase === "focus" ? "집중하는 중" : "잠깐 쉬어가요"}
         </p>
-        <p className="font-serif text-7xl font-bold tabular-nums sm:text-8xl">{fmt(t.left)}</p>
+        <p className="font-serif text-7xl font-bold tabular-nums sm:text-8xl">{fmt(secondsLeft)}</p>
         <p className="text-sm opacity-80" aria-label={`완료한 포모도로 ${t.done}개`}>
           {t.done > 0 ? "🍅".repeat(Math.min(t.done, 8)) + ` ${t.done}회 완료 · ` : ""}
           오늘 집중 {focusMinutes}분
@@ -284,7 +337,7 @@ export function FocusOverlay({ onClose }: { onClose: () => void }) {
         <div className="mt-4 flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setRunning((r) => !r)}
+            onClick={handlePauseResume}
             className="flex items-center gap-1.5 rounded-full border border-white/30 px-5 py-2 text-sm transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
           >
             {running ? (
